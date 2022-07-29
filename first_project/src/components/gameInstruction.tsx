@@ -1,7 +1,10 @@
-export interface IInstructionProps {
+
+// ** change
+// used your Interface in coponent
+interface IInstructionProps {
     resetBoard: () => void;
 }
-const GameInstruction = () => (
+const GameInstruction:React.FC<IInstructionProps> = ({resetBoard}) => (
     <div>
         <header className={"titleInstruction"}>
             How to Play
@@ -21,8 +24,8 @@ const GameInstruction = () => (
                 <span>
           <kbd>d</kbd> Move Right
         </span>
-        <button onClick={() => console.log("reset")}>Reset game</button>
+        <button onClick={resetBoard}>Reset game</button>
     </div>
 );
-
+// TODO implement reset function
 export default GameInstruction;

@@ -1,9 +1,8 @@
 import "../App";
-import {useCallback, useEffect, useRef, useState} from "react";
-import {clearCanvas, drawCanvas, IObjectPosition} from "../utils/canvasOperation";
-import {useDispatch, useSelector} from "react-redux";
-import {ICanvasBoard, IInitialGameState} from "./CanvasBoard";
-import {makeMove} from "../store/actions";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { clearCanvas, drawCanvas } from "../utils/canvasOperation";
+import { useDispatch, useSelector } from "react-redux";
+import { makeMove } from "../store/actions";
 import {
     DOWN,
     LEFT,
@@ -16,18 +15,13 @@ import {
     RIGHT,
     UP
 } from "../store/constants";
-import {log} from "util";
+import { IInitialGameState, ICanvasBoard, IObjectPosition } from "../utils/interfaces";
 
-
-
-
-
-
-
-export const useSnakePosition = ()=> {
+// ? hooks should have separete file 
+export const useSnakePosition = () => {
     return useSelector((state: IInitialGameState) => state.snakePosition)
 }
-const CanvasSnake = ({height, width, cellSize}: ICanvasBoard) => {
+const CanvasSnake = ({ height, width, cellSize }: ICanvasBoard) => {
     console.log("snake dispatch")
     const dispatch = useDispatch();
     const ref = useRef<HTMLCanvasElement | null>(null);
@@ -52,19 +46,19 @@ const CanvasSnake = ({height, width, cellSize}: ICanvasBoard) => {
                     dispatch(makeMove(cellSize, 0, MOVE_RIGHT))
                     break;
                 case MOVE_RIGHT_EDGE:
-                    dispatch(makeMove(-width-cellSize, 0, MOVE_RIGHT))
+                    dispatch(makeMove(-width - cellSize, 0, MOVE_RIGHT))
                     moveSnake(RIGHT);
                     break;
                 case MOVE_LEFT_EDGE:
-                    dispatch(makeMove(width+cellSize, 0, MOVE_LEFT))
+                    dispatch(makeMove(width + cellSize, 0, MOVE_LEFT))
                     moveSnake(LEFT);
                     break;
                 case MOVE_UP_EDGE:
-                    dispatch(makeMove(0, height+cellSize, MOVE_UP))
+                    dispatch(makeMove(0, height + cellSize, MOVE_UP))
                     moveSnake(UP);
                     break;
                 case MOVE_DOWN_EDGE:
-                    dispatch(makeMove(0, -height-cellSize, MOVE_DOWN))
+                    dispatch(makeMove(0, -height - cellSize, MOVE_DOWN))
                     moveSnake(DOWN);
                     break;
                 default:
@@ -107,16 +101,26 @@ const CanvasSnake = ({height, width, cellSize}: ICanvasBoard) => {
 
     }
     useEffect(() => {
-//ref.current;
-
+        //ref.current;
+        if(!context){
             setContext(ref.current && ref.current.getContext("2d"));
             clearCanvas(context);
-            hasSnakeCollidedWithBoard(snakePosition);
-            drawCanvas(context,snakePosition,cellSize,);
-
             window.addEventListener("keypress", handleKeyEvents);
-        },
-        [context, snakePosition, dispatch, handleKeyEvents])
+        }
+    }, [context, handleKeyEvents])
+
+    // ** change
+    /**
+     * separeted useEffects and prevented context to set when its already set
+     * becouse of separetion the above one only renders when page is initialyloaded
+     * or context changes to null so it prevents unnecessary renders  
+     */
+    useEffect(() => {
+        clearCanvas(context);
+        hasSnakeCollidedWithBoard(snakePosition);
+        drawCanvas(context, snakePosition, cellSize,);
+    }, [snakePosition, context, cellSize])
+    
 
     useEffect(() => {
         window.addEventListener("keypress", handleKeyEvents);
@@ -128,7 +132,7 @@ const CanvasSnake = ({height, width, cellSize}: ICanvasBoard) => {
     /*because that we used position fixed in our app.css class to center our board and snake we have to set margin left
     * like below
     * */
-    return <canvas className={"canvas"} ref={ref} height={height} width={width} style={{marginLeft: -width / 2}}/>
+    return <canvas className={"canvas"} ref={ref} height={height} width={width} style={{ marginLeft: -width / 2 }} />
 
 
 }

@@ -1,6 +1,7 @@
 import "../App";
 import {useSelector} from "react-redux";
-import {IInitialGameState} from "./CanvasBoard";
+import { IInitialGameState } from "../utils/interfaces";
+
 const MainBar = ()=>{
     const score = useSelector((state:IInitialGameState)=> state.score)
     return (<>

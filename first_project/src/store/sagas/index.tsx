@@ -1,7 +1,7 @@
 import "../../App";
 import {takeLatest, put,delay} from 'redux-saga/effects';
 import {DOWN, LEFT, MOVE_DOWN, MOVE_LEFT, MOVE_RIGHT, MOVE_UP, RIGHT, UP} from "../constants";
-import {IObjectPosition} from "../../utils/canvasOperation";
+import { IObjectPosition } from "../../utils/interfaces";
 function* Move(params: {
     type: String;
     payload: IObjectPosition;

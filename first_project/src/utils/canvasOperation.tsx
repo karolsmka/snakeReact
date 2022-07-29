@@ -1,16 +1,11 @@
+import { IObjectPosition } from "./interfaces";
+
 export const clearCanvas = (context: CanvasRenderingContext2D | null) => {
     if (context) {
         context.clearRect(0, 0, 1000, 600);
     }
 };
 
-/*Interface to divide our canvas into smaller elements to better handling position on the board
-* position of snake and apple
-* */
-export interface IObjectPosition {
-    posX: number,
-    posY: number,
-}
 
 /*Function to create objects on canvas for example snake body or apple we need array of object position
 *because snake can be long and can be on couple of square on the board

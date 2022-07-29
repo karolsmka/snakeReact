@@ -1,39 +1,24 @@
-import {useEffect, useState, useRef} from "react";
+import { useEffect, useState, useRef } from "react";
 import "../App";
-import CanvasSnake, {useSnakePosition} from "./CanvasSnake";
+import CanvasSnake, { useSnakePosition } from "./CanvasSnake";
 import {
     clearCanvas,
-    drawCanvas,
     drawImageOnCanvas,
     generateRandomPosition,
-    IObjectPosition
 } from "../utils/canvasOperation";
-import {useDispatch, useSelector} from "react-redux";
-import {INCREMENT_SCORE} from "../store/constants";
-import {increaseSnake, scoreUpdates} from "../store/actions";
+import { useDispatch, useSelector } from "react-redux";
+import { INCREMENT_SCORE } from "../store/constants";
+import { increaseSnake, scoreUpdates } from "../store/actions";
 import GameInstruction from "./gameInstruction";
-import App from "../App";
-import gameInstruction from "./gameInstruction";
-
-export interface ICanvasBoard {
-    height: number;
-    width: number;
-    cellSize: number
-}
-
-export interface IInitialGameState {
-    snakePosition: IObjectPosition[] | [];
-    applePosition: IObjectPosition | null;
-    score: number;
-}
+import { ICanvasBoard, IInitialGameState, IObjectPosition } from "../utils/interfaces";
 
 export const initialGameState: IInitialGameState = {
     //Postion of the entire snake
     snakePosition: [
-        {posX: 280, posY: 300},
-        {posX: 300, posY: 300},
+        { posX: 280, posY: 300 },
+        { posX: 300, posY: 300 },
     ],
-    applePosition: {posX: 10, posY: 30},
+    applePosition: { posX: 10, posY: 30 },
     //just to test i have to improve that later
     score: 0,
 };
@@ -41,7 +26,7 @@ export const useApplePosition = () => {
     return useSelector((state: IInitialGameState) => state.applePosition)
 }
 
-const CanvasBoard = ({height, width, cellSize}: ICanvasBoard) => {
+const CanvasBoard = ({ height, width, cellSize }: ICanvasBoard) => {
     const dispatch = useDispatch();
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [applePosition, setApplePosition] = useState<IObjectPosition>(
@@ -55,40 +40,54 @@ const CanvasBoard = ({height, width, cellSize}: ICanvasBoard) => {
     const snakePos = useSnakePosition();
     const [context, setContext] = useState<CanvasRenderingContext2D | null>(null);
 
-    useEffect(() => {
-            //debugger;
-//canvasRef.current;
-            setContext(canvasRef.current && canvasRef.current.getContext("2d"));
-            clearCanvas(context);
-            if (img === null)
-                if (context) {
-                    const image = new Image();
-                    image.src = "../images/apple.png";
-                    image.onload = () => {
-                        console.log("jestem");
-                        setImage(image)
-                    }
-                }
+    // ** change
+    /** changed useEffects behaviour now sertain properties are spepareted so 
+     * they don't make unnecessary renders
+     */
 
-            drawImageOnCanvas(context, [applePosition], cellSize, img)
-            console.log(snakePos[0])
-            console.log(applePosition)
-            console.log(lastX)
-            console.log(lastY)
-            if (snakePos[0].posX === applePosition.posX && snakePos[0].posY === applePosition.posY &&
-                (lastX !== applePosition.posX || lastY != applePosition.posY)) {
-                setLastX(applePosition.posX)
-                setLastY(applePosition.posY)
-                setIsConsumed(true);
+    useEffect(() => {
+        //debugger;
+        //canvasRef.current;
+        setContext(canvasRef.current && canvasRef.current.getContext("2d"));
+        clearCanvas(context);
+        if (img === null)
+            if (context) {
+                const image = new Image();
+                image.src = "../images/apple.png";
+                image.onload = () => {
+                    console.log("jestem");
+                    setImage(image)
+                }
             }
+    }, [context, cellSize])
+
+
+    useEffect(() => {
+        if (snakePos[0].posX === applePosition.posX && snakePos[0].posY === applePosition.posY &&
+            (lastX !== applePosition.posX || lastY !== applePosition.posY)) {
+            setLastX(applePosition.posX)
+            setLastY(applePosition.posY)
+            setIsConsumed(true);
         }
-        ,
-        [applePosition, context, cellSize, snakePos,]
-    )
+    }, [snakePos, applePosition])
+    
+    useEffect(() => {
+        if(context && img){
+            drawImageOnCanvas(context, [applePosition], cellSize, img)
+            console.log('drawImageOnCanvasHappens')
+            console.log([snakePos[0]])
+            console.log({applePosition})
+            console.log({lastX})
+            console.log({lastY})
+        }
+    
+    }, [applePosition, context, img])
+    
 
     useEffect(() => {
         //   debugger;
-        if (isConsumed) {
+        if (isConsumed && context) {
+            clearCanvas(context);
             setApplePosition(generateRandomPosition(width - cellSize, height - cellSize, cellSize))
             console.log("apple nie")
 
@@ -100,20 +99,22 @@ const CanvasBoard = ({height, width, cellSize}: ICanvasBoard) => {
             dispatch(scoreUpdates(INCREMENT_SCORE));
 
         }
-    }, [isConsumed, applePosition])
+    }, [isConsumed, context])
 
-
-    return (<div className={"App"}>
-        <div className={"GameArea"}>
+    // ** change
+    // className props dont need to be in wraped in {} unless you are passing some variable
+    return (<div className="App">
+        <div className="GameArea">
             <canvas ref={canvasRef} className={["canvas-board", "canvas"].join(' ')}
-                    style={{marginLeft: -width / 2}}
-                    height={height} width={width}/>
-            <CanvasSnake height={height} width={width} cellSize={cellSize}/>
-            </div>
-            <div className={"gameInstruction"}>
-            <GameInstruction/>
-            </div>
+                style={{ marginLeft: -width / 2 }}
+                height={height} width={width} />
+            <CanvasSnake height={height} width={width} cellSize={cellSize} />
         </div>
+        <div className="gameInstruction">
+            {/* TODO add working resetBoard function later */}
+            <GameInstruction resetBoard={() => console.log('reset')}/>
+        </div>
+    </div>
     )
 }
 export default CanvasBoard
