@@ -1,5 +1,3 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import CanvasBoard from "./components/CanvasBoard";
 import {Provider} from "react-redux";
